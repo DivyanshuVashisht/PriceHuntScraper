@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: pricehunt-scraper
+    runtime: python
+    buildCommand: pip install -r requirements.txt && playwrite install
+    startCommand: python app.py
+    plan: free

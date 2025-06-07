@@ -1,0 +1,5 @@
+scraperEnv/
+__pycache__/
+*pyc
+*.bak
+*.swp
