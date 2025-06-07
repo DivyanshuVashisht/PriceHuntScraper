@@ -7,7 +7,7 @@ load_dotenv()
 
 def scrape_flipkart(query):
     url = f"https://www.flipkart.com/search?q={requests.utils.quote(query)}"
-    r = requests.get(url, headers={ os.getenv("HEADERS"): os.getenv("HEADERS_USER_AGENT")}, timeout=5)
+    r = requests.get(url, headers={ os.getenv("HEADERS"): os.getenv("HEADERS_USER_AGENT")}, timeout=100)
     soup = BeautifulSoup(r.text, "html.parser")
     items = []
 
