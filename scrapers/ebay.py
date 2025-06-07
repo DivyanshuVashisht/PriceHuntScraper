@@ -31,31 +31,32 @@ def scrape_ebay(query):
         for div in product_divs[:6]: 
             
            title = div.select_one("div.s-item__title")
+           if not title: continue
            unwanted_prefix = "New Listing"
            if title.get_text(strip=True).startswith(unwanted_prefix):
                cleaned_title = title.get_text(strip=True)[len(unwanted_prefix):].strip()
            else:
                cleaned_title = title.get_text(strip=True) # If "New Listing" is not there, use the full text
 
-           price = div.select_one("span.s-item__price").get_text(strip=True)
-           link = div.select_one("div.s-item__info a.s-item__link")["href"]
-           image = div.select_one("div.s-item__image-wrapper img")["src"]
+           price = div.select_one("span.s-item__price")
+           link = div.select_one("div.s-item__info a.s-item__link")
+           image = div.select_one("div.s-item__image-wrapper img")
            
            # Debugging prints - keep for now to verify
-           print(f"--- Product ---")            
-           print(f"Title: {cleaned_title}")
-           print(f"Price: {price}")
-           print(f"URL: {link}")
-           print(f"Image: {image}")
-           print("-" * 20)
+        #    print(f"--- Product ---")            
+        #    print(f"Title: {cleaned_title}")
+        #    print(f"Price: {price}")
+        #    print(f"URL: {link}")
+        #    print(f"Image: {image}")
+        #    print("-" * 20)
            
            # Create the product data dictionary
            product_data = {
-              "title": cleaned_title,
-              "price": price,
+              "title": cleaned_title if cleaned_title else None,
+              "price": price.get_text(strip=True) if price else None,
               "site": "eBay", 
-              "url": link if link else None,
-              "image": image
+              "url": link["href"] if link else None,
+              "image": image["src"] if image else None
            }
 
            # Only append if essential data is found
