@@ -1,5 +1,5 @@
 import os 
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/tmp/playwright"
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/opt/render/project/.cache/playwright"
 
 from playwright.sync_api import sync_playwright
 
