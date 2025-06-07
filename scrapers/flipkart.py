@@ -1,3 +1,6 @@
+import os 
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/tmp/playwright"
+
 from playwright.sync_api import sync_playwright
 
 def scrape_flipkart(query):

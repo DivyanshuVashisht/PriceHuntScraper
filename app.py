@@ -1,7 +1,3 @@
-import os 
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/tmp/playwright"
-
-
 from flask import Flask, request, jsonify
 from scrapers.amazon import scrape_amazon
 from scrapers.flipkart import scrape_flipkart
