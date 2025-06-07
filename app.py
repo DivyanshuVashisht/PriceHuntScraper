@@ -8,13 +8,14 @@ app = Flask(__name__)
 def scrape():
     query = request.args.get("q")
     if not query:
-        return jsonify({"error": "Missing query"}), 400
+        return jsonify({"error": "Missing 'q' query"}), 400
     
-    results = []
-    results.extend(scrape_amazon(query))
-    results.extend(scrape_flipkart(query))
 
-    return jsonify(results)
+    try:
+        results = scrape_amazon(query) + scrape_flipkart(query)
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

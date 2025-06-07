@@ -1,55 +1,46 @@
-import os 
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/opt/render/project/.cache/playwright"
+import requests
+import os
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
-from playwright.sync_api import sync_playwright
+load_dotenv()
 
 def scrape_amazon(query):
-    products = []
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.goto(f"https://www.amazon.in/s?k={query}")
+    url = f"https://www.amazon.in/s?k={requests.utils.quote(query)}"
+    r = requests.get(url, headers={ os.getenv("HEADERS"): os.getenv("HEADERS_USER_AGENT")}, timeout=5)
+    soup = BeautifulSoup(r.text, "html.parser")
+    items = []
 
-        try:
-            page.wait_for_selector("div.s-result-item[data-asin]", timeout=15000)
-        except Exception as e:
-            print(f"Failed to load search results page or find product items: {e}")
-            browser.close()
-            return []
+    product_divs = soup.select("div.s-result-item[data-asin]")
 
-        # print("div.s-result-item loaded successfully")
+    if not product_divs:
+        print(f"No product divs found for query: {query}")
+        return []
+    
+
+    for div in product_divs[:6]:
+        title = div.select_one("a.a-link-normal h2 span")
+        price = div.select_one("span.a-price-whole")
+        link = div.select_one("a.a-link-normal")
+        image = div.select_one("img.s-image")
+
+        product_data = {
+            "title": title.get_text(strip=True) if title else None,
+            "price": price.get_text(strip=True) if price else None,
+            "site": "Amazon",
+            "url": "https://www.amazon.in" + link["href"] if link and link.has_attr("href") else None,
+            "image": image["src"] if image and image.has_attr("src") else None
+        }
+
+        if title and price and link:
+            items.append(product_data)
         
-        items = page.query_selector_all("div.s-result-item[data-asin]")
+        # Debugging prints - keep for now to verify
+        # print(f"--- Product ---")
+        # print(f"Title: {product_data['title']}")
+        # print(f"Price: {product_data['price']}")
+        # print(f"URL: {product_data['url']}")
+        # print(f"Image: {product_data['image']}")
+        # print("-" * 20)
         
-        for item in items[:5]:
-            title = item.query_selector("h2 span")
-            price = item.query_selector(".a-price-whole")
-            link = item.query_selector("a.a-link-normal.s-line-clamp-2")
-            image = item.query_selector("img.s-image")
-
-            title_text = title.inner_text() if title else None
-            # print(f"title_text: {title_text}")
-            price_text = price.inner_text() if price else None
-            # print(f"price_test: {price_text}")
-
-            # Get the full URL from the link element's href attribute
-            link_url = link.get_attribute('href') if link else None
-
-            # Ensure the link is relative and construct the full URL
-            full_product_url = f"https://www.amazon.in{link_url}" if link_url and link_url.startswith('/') else link_url
-            # print(f"full_product_url: {full_product_url}")
-
-            image_src = image.get_attribute("src") if image else ""
-            # print(f"image_src: {image_src}")
-
-            if title and price and link:
-                products.append({
-                    "title": title_text,
-                    "price": f"₹{price_text}",
-                    "site": "Amazon",
-                    "url": full_product_url,
-                    "image": image_src,
-                })
-
-        browser.close()
-    return products
+    return items
