@@ -1,5 +1,5 @@
 import os 
-os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/temp/playwright"
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/tmp/playwright"
 
 
 from flask import Flask, request, jsonify
