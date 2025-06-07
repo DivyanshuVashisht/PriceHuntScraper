@@ -4,9 +4,9 @@ services:
     runtime: python
     buildCommand: |
       pip install -r requirements.txt
-      python -m playwright install chromium
-    startCommand: python app.py
+      python -m playwright install --with-deps
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     plan: free
     envVars:
       - key: PLAYWRIGHT_BROWSERS_PATH
-        value: /tmp/playwright
+        value: /opt/render/project/.cache/playwright
